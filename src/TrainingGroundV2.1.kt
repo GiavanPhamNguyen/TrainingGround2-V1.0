@@ -1,8 +1,6 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-class Player(val name: String, var stamina: Int, var maxStamina: Int, var hp: Int, val maxHp: Int, val regenFactor: Int){
+class Player(val name: String, var stamina: Int, var maxStamina: Int, var hp: Int, val maxHp: Int, val regenFactor: Int){ //Create a player class with all the capabilities and functions used by an object in this class
 
-    fun attack(enemy: Enemy, staminaCost: Int, damageMult: Int, hitChance: Int){
+    fun attack(enemy: Enemy, staminaCost: Int, damageMult: Int, hitChance: Int){ //attacking function
         if (stamina < staminaCost){
             println("The $name is too tired to attack!")
             return
@@ -24,19 +22,19 @@ class Player(val name: String, var stamina: Int, var maxStamina: Int, var hp: In
         }
     }
 
-    fun isAlive(): Boolean = hp > 0
+    fun isAlive(): Boolean = hp > 0 //checking whether the player, or in this case, party members, are still alive
 
-    fun takeDamage(amount: Int){
+    fun takeDamage(amount: Int){ //function for computing damage being done by the enemy class
         hp -= amount
         println("$name has taken $amount points of damage!")
     }
 
-    fun showStats(){
+    fun showStats(){ //function for showing stats
         if (hp < 0) hp = 0
         println("$name | STAMINA: $stamina/$maxStamina | HP: $hp/$maxHp | ")
     }
 
-    fun heal(){
+    fun heal(){ //function for healing
         val healAmount = (2..12).random()
         hp += healAmount
         if (hp > maxHp) hp = maxHp
@@ -45,7 +43,14 @@ class Player(val name: String, var stamina: Int, var maxStamina: Int, var hp: In
         println()
     }
 
-    fun quit(): Boolean{
+    fun staminaRegen(){  // stamina regen function for every party member that is alive for every turn/action taken
+        if (isAlive()){
+            stamina = (stamina + regenFactor).coerceAtMost(maxStamina)
+            println("${name} regained ${regenFactor} points of stamina.")
+        }
+    }
+
+    fun quit(): Boolean{ //for quitting and throwing an additional check to ensure the user wants to quit
         var input: String
         do{
             println("Are you sure? (Y/N)")
@@ -55,8 +60,8 @@ class Player(val name: String, var stamina: Int, var maxStamina: Int, var hp: In
     }
 }
 
-class Enemy(val name: String, var hp: Int, val maxHp: Int, val level: Int){
-    fun attack(player: Player){
+class Enemy(val name: String, var hp: Int, val maxHp: Int, val level: Int){ //class for enemy types that will be the template for enemies used in this game
+    fun attack(player: Player){ //function for attacking by the enemy, including damage being done to the player
         if (isAlive()){
             println("The $name is attacking!")
             val attackChance = (2..12).random()
@@ -70,20 +75,23 @@ class Enemy(val name: String, var hp: Int, val maxHp: Int, val level: Int){
         }
     }
 
-    fun takeDamage(amount: Int){
+    fun takeDamage(amount: Int){ //function for the enemy to take damage, very crucial
         hp -= amount
         if (hp < 0) hp = 0
     }
 
-    fun showStats(){
+    fun showStats(){ //function to show the HP of the enemy
         println("$name | HP: $hp/$maxHp | ")
     }
 
-    fun isAlive(): Boolean = hp > 0
+    fun isAlive(): Boolean{ //function for checking if object of enemy class is still alive
+        return hp > 0
+    }
 }
 
-fun main(){
-    // Characters
+fun main(){ //main function
+    // This game will be different in that instead of the player attacking directly, the player will be in charge of a group of characters, created using the "Player" class, preset with stamina, HP, and other factors
+    //Array of preset characters for the party
     val party = arrayOf(
         Player("Warrior", 25, 25, 40, 40, 1),
         Player("Wizard", 40, 35, 25, 25, 2),
@@ -91,7 +99,7 @@ fun main(){
         Player("Dwarf", 25, 20, 50, 50, 2)
     )
 
-    // Lesser enemies
+    // Created an array of "lesser" enemies, using the Enemy class, preset with health and level (to be used in conjunction with the attack function)
     val lesserEnemies = arrayOf(
         Enemy("Warlike Goblin", 20, 20, 2),
         Enemy("Giant Spider", 25, 25, 3),
@@ -104,26 +112,14 @@ fun main(){
         Enemy("Terrifying Minotaur", 50, 50, 8)
     )
 
-    // Boss enemies
+    // Created an array of "boss" enemies, still using the Enemy class
     val bossEnemies = arrayOf(
         Enemy("Ferocious Wyvern", 100, 100, 9),
         Enemy("Elder Dragon", 120, 120, 10),
         Enemy("Ancient Creature of the Deep", 200, 200, 11),
     )
 
-    // Helper function for stamina regen
-    fun regenAllParty(){
-        println()
-        println("All party member recovered some stamina!")
-        for (player in party){
-            if (player.isAlive()){
-                player.stamina = (player.stamina + player.regenFactor).coerceAtMost(player.maxStamina)
-                println("${player.name} regained ${player.regenFactor} points of stamina.")
-            }
-        }
-        println()
-    }
-
+    //introducing the user to the game, along with stats and info
     println("Welcome to the dungeon's gate! Before entering, please enter the player's name: ")
     val name = readln()
     println()
@@ -153,7 +149,7 @@ fun main(){
         println("Have a good day then!")
         return
     }
-
+    //initializing index to move along the lesser enemies array and a boss index for the boss enemies array, and coins to keep track of total gold won by user
     var action: Int
     var index = 0
     var bossIndex = 0
@@ -161,17 +157,17 @@ fun main(){
     var coins = 0
     var quit = false
 
-    println("The dungeon's gate rumbled open. Your party advanced forward, into the mysterious dungeon. Suddenly, a hulking figure appeared. Your first enemy.")
-
+    println("The dungeon's gate rumbled open. Your party advanced forward into the mysterious dungeon. Suddenly, a hulking figure appeared. Your first enemy.")
+    //while any member of the party is alive or (any lesser or boss enemy is alive) the quit flag has not been thrown, this loop will keep the game running
     while (!quit && party.any { it.isAlive() } && (lesserEnemies.any { it.isAlive() } || bossEnemies.any { it.isAlive() })){
 
-        // Lesser enemy combat
+        // Lesser enemy combat, while the current lesser enemy is alive and the array has not been exhausted, the loop will continue
         if (index < lesserEnemies.size && lesserEnemies[index].isAlive()){
             println()
-            println("Your party stands before the ${lesserEnemies[index].name} | HP: ${lesserEnemies[index].maxHp}")
+            println("Your party stands before the ${lesserEnemies[index].name}! | HP: ${lesserEnemies[index].maxHp}")
 
             while (!quit && lesserEnemies[index].isAlive()){
-                if (party.none { it.isAlive() }) {
+                if (party.none { it.isAlive() }){
                     quit = true
                     break
                 }
@@ -212,16 +208,22 @@ fun main(){
 
                 when (action){
                     1 -> {
-                        // Attack values based on character
+                        // attack chance, damage multiplier and stamina cost based on character
                         when (partyChoice) {
                             0 -> party[partyChoice].attack(lesserEnemies[index], 3, 1, 6)
                             1 -> party[partyChoice].attack(lesserEnemies[index], 4, 2, 7)
                             2 -> party[partyChoice].attack(lesserEnemies[index], 3, 1, 7)
                             3 -> party[partyChoice].attack(lesserEnemies[index], 5, 3, 9)
                         }
+                        //updating turn to show at the end of the game how many turns the user lasted
                         turnCounter++
                         lesserEnemies[index].attack(party[partyChoice])
-                        regenAllParty()
+                        println()
+                        println("All party member recovered some stamina!")
+                        for (player in party){
+                            player.staminaRegen()
+                        }
+                        println()
                         party[partyChoice].showStats()
                         lesserEnemies[index].showStats()
                     }
@@ -229,14 +231,19 @@ fun main(){
                         party[partyChoice].heal()
                         turnCounter++
                         lesserEnemies[index].attack(party[partyChoice])
-                        regenAllParty()
+                        println()
+                        println("All party member recovered some stamina!")
+                        for (player in party){
+                            player.staminaRegen()
+                        }
+                        println()
                         party[partyChoice].showStats()
                         lesserEnemies[index].showStats()
                     }
                     3 -> if (party[partyChoice].quit()) quit = true
                 }
             }
-
+            //when a lesser enemy is defeated, award loot and updating index to continue to the next lesser enemy in the array
             if (!quit && lesserEnemies[index].hp <= 0){
                 println("The ${lesserEnemies[index].name} has been defeated!")
                 val loot = (10..50).random()
@@ -247,11 +254,12 @@ fun main(){
             }
         }
 
-        // Boss combat every 3 enemies
+        // Boss combat will initiate every 3 lesser enemies
         if (!quit && index % 3 == 0 && bossIndex < bossEnemies.size){
             println()
             println("A boss appears! Your party encounters the ${bossEnemies[bossIndex].name}! | HP: ${bossEnemies[bossIndex].maxHp}")
 
+            //This loop will run while the current boss is alive and the user has not chosen to quit
             while (bossEnemies[bossIndex].isAlive() && !quit){
                 if (party.none { it.isAlive() }){
                     quit = true
@@ -297,7 +305,12 @@ fun main(){
                         party[partyChoice].attack(bossEnemies[bossIndex], 5, 1, 6)
                         turnCounter++
                         bossEnemies[bossIndex].attack(party[partyChoice])
-                        regenAllParty()
+                        println()
+                        println("All party member recovered some stamina!")
+                        for (player in party){
+                            player.staminaRegen()
+                        }
+                        println()
                         party[partyChoice].showStats()
                         bossEnemies[bossIndex].showStats()
                     }
@@ -305,7 +318,12 @@ fun main(){
                         party[partyChoice].heal()
                         turnCounter++
                         bossEnemies[bossIndex].attack(party[partyChoice])
-                        regenAllParty()
+                        println()
+                        println("All party member recovered some stamina!")
+                        for (player in party){
+                            player.staminaRegen()
+                        }
+                        println()
                         party[partyChoice].showStats()
                         bossEnemies[bossIndex].showStats()
                     }
@@ -329,7 +347,7 @@ fun main(){
         }
     }
 
-    // Endgame stats
+    // Endgame stats, active whether all members of the party is dead, all enemies has been defeated, or the user has quit the game.
     println()
     if (party.none { it.isAlive() }){
         println("All party members have fallen! Game Over.")
