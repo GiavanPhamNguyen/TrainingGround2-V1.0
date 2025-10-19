@@ -46,8 +46,8 @@ Welcome to TrainingGroundV2, updated into a turn-based dungeon crawler where you
 
 Clone the repository:
 ```bash
-git clone https://github.com/username/repo-name.git
-cd repo-name
+git clone https://github.com/GiavanPhamNguyen/TrainingGround2-V1.0.git
+cd TrainingGround2-V1.0
 open project in IntelliJ IDEA or Kotlin-compatible IDE
 run main() in TrainingGroundV2.1.kt
 
